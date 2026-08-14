@@ -13,7 +13,9 @@ trên Odoo 17 Community.
 - [docs/DECISIONS.md](docs/DECISIONS.md): **nguồn sự thật duy nhất** cho mọi
   quyết định nghiệp vụ và kỹ thuật.
 - [docs/LEARNING_LOG.md](docs/LEARNING_LOG.md): nhật ký học theo buổi.
-- [CLAUDE.md](CLAUDE.md): hợp đồng làm việc mentor/học viên (hybrid AI-assisted).
+- [AGENTS.md](AGENTS.md): hợp đồng làm việc giữa học viên và AI agent
+  (hybrid AI-assisted) — **áp dụng cho mọi công cụ**.
+- [CLAUDE.md](CLAUDE.md): con trỏ về `AGENTS.md` + ghi chú riêng Claude Code.
 - [env/](env/): bản gốc của các file môi trường Docker.
 
 ## Định hướng triển khai

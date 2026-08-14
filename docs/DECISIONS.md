@@ -30,7 +30,11 @@ Chỉ chủ dự án mới chuyển được trạng thái.
 ### D07 — Hybrid AI-assisted learning
 
 D07 **làm rõ và thay thế phần "user viết toàn bộ code" của D05**. D05 vẫn giữ
-nguyên ở phần: Claude không tự ý sửa code khi chưa được giao.
+nguyên ở phần: agent không tự ý sửa code khi chưa được giao.
+
+D05 viết ra khi mới chỉ dùng Claude. D07 áp dụng cho **mọi AI agent** — Claude
+Code, Codex, Cursor, Gemini CLI hay công cụ khác. Hợp đồng chuẩn nằm ở
+[`AGENTS.md`](../AGENTS.md); các file như `CLAUDE.md` chỉ trỏ về đó.
 
 > User sở hữu: phân rã việc, decision, acceptance criteria, verification,
 > debugger và learning log.

@@ -243,7 +243,7 @@ Cấu hình chi tiết cho PyCharm và VS Code: `ROADMAP.md` §3.4.
 
 > Mục này là **nguồn lệnh chuẩn** của dự án: bộ lệnh hằng ngày
 > install/upgrade/test/shell/psql/down chỉ được duy trì tại đây.
-> `CLAUDE.md` giữ ba lệnh mở đầu buổi và trỏ về đây. `ROADMAP.md` chỉ lặp các
+> `AGENTS.md` giữ ba lệnh mở đầu buổi và trỏ về đây. `ROADMAP.md` chỉ lặp các
 > lệnh cần cho bài debug (§3.4), vì ở đó lệnh là một phần của bài học.
 > Sửa lệnh hằng ngày thì sửa ở đây trước.
 
@@ -302,7 +302,7 @@ Chỉ những gì nằm trong repo mới đi theo bạn:
 | Đi theo repo | Không đi theo repo |
 | --- | --- |
 | `env/` (4 file môi trường) | Docker volumes: `postgres-data`, `odoo-data` |
-| `docs/`, `ROADMAP.md`, `CLAUDE.md` | Database và dữ liệu test |
+| `docs/`, `ROADMAP.md`, `AGENTS.md`, `CLAUDE.md` | Database và dữ liệu test |
 | Code module | Image đã build |
 
 Database **không** được đồng bộ. Trên máy mới phải tạo lại database và cài module
