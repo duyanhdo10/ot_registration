@@ -9,6 +9,12 @@ Kết quả cuối cùng cần đạt được:
 
 - Xây dựng một module chạy sạch trên Odoo 17 Community.
 - Hiểu các concept Odoo được dùng trong từng phần, không chỉ sao chép code.
+- Biết phân rã một tính năng thành các việc kỹ thuật nhỏ, tự xác định đầu vào,
+  ràng buộc và tiêu chí hoàn thành trước khi giao cho AI agent.
+- Dùng AI để tăng tốc viết code, test và tra cứu nhưng vẫn tự review, giải thích,
+  chạy thử và chịu trách nhiệm cho thay đổi được merge.
+- Biết điều khiển debugger cho Python/Odoo và JavaScript, đặt breakpoint theo
+  giả thuyết và lần theo dữ liệu thay vì chỉ gửi stack trace cho AI sửa hộ.
 - Hoàn thành luồng đăng ký và phê duyệt OT theo `REQUIREMENTS.md`.
 - Có test tự động cho nghiệp vụ, phân quyền và migration.
 - Có thể cài mới, cập nhật module và kiểm thử trên môi trường local.
@@ -20,15 +26,35 @@ Thời lượng dự kiến:
 
 Tỷ lệ thời gian khuyến nghị cho mỗi buổi:
 
-- 20% đọc concept và tài liệu.
-- 60% triển khai một phần nhỏ có thể chạy được.
-- 20% viết test, ghi chú và commit.
+- 25% học concept, đọc code liên quan và tự vẽ luồng.
+- 15% phân rã việc, viết task brief/prompt cho AI.
+- 20% triển khai từng lát nhỏ (user hoặc AI, theo D07).
+- 30% review code, chạy test và debug bằng breakpoint.
+- 10% ghi learning log và commit.
+
+Verify chiếm nhiều thời gian hơn implement là **có chủ đích**. Khi AI gánh bớt
+phần gõ code, bottleneck chuyển sang khâu kiểm chứng; nếu review vẫn ít hơn
+implement thì buổi học đang phân bổ theo mô hình code tay.
+
+Roadmap không đặt mục tiêu “code tay 100%”. Mục tiêu là trở thành developer có
+thể chỉ huy AI làm đúng việc: biết hệ thống cần thay đổi ở đâu, vì sao, kiểm tra
+kết quả bằng cách nào và tự tìm được nguyên nhân khi kết quả sai.
 
 ## 2. Decision log
+
+> **Nguồn sự thật duy nhất cho decision là [`docs/DECISIONS.md`](docs/DECISIONS.md).**
+> Mục 2 dưới đây chỉ là bản tóm tắt để đọc cùng roadmap. Khi hai file lệch nhau,
+> `docs/DECISIONS.md` thắng, và phải sửa lại mục này cho khớp.
 
 Roadmap phân biệt rõ quyết định đã được xác nhận và đề xuất kỹ thuật còn chờ
 nghiệp vụ xác nhận. Không triển khai một mục `Pending` như thể đó là yêu cầu đã
 được chốt.
+
+Có bốn trạng thái: `Confirmed`, `Working Assumption`, `Pending`, `Deferred`.
+Định nghĩa và điều kiện của `Working Assumption` nằm ở `docs/DECISIONS.md` §3.
+Điểm cần nhớ: **thời gian trôi qua không tự chuyển `Pending` thành trạng thái
+khác**; chỉ chủ dự án mới đổi được trạng thái. Khi một decision còn `Pending`,
+đường đi hợp lệ là tổ chức buổi đóng decision, không phải tự hợp thức hóa nó.
 
 ### 2.1. Quyết định đã xác nhận
 
@@ -38,6 +64,9 @@ nghiệp vụ xác nhận. Không triển khai một mục `Pending` như thể 
 | D02 | Code Odoo cũ chỉ để tham khảo; không nâng cấp database thật từ Odoo 12 | Chủ dự án | 2026-07-30 |
 | D03 | Hạn Submit là hai ngày lịch, tính theo timezone của user thực hiện Submit | Chủ dự án | 2026-07-30 |
 | D04 | Email không đổi state bằng HTTP GET; user phải đăng nhập và xác nhận trong Odoo | Chủ dự án | 2026-07-30 |
+| D05 | Mentor mode: Claude giảng và review, không tự ý sửa code module khi chưa được giao | Chủ dự án | 2026-07-31 |
+| D06 | Giữ cả hai bản clone; chỉ làm việc trong `vti-japan/` | Chủ dự án | 2026-07-31 |
+| D07 | Hybrid AI-assisted learning; làm rõ phần "ai viết code" của D05 (xem §3.1) | Chủ dự án | 2026-08-14 |
 
 Chi tiết D03:
 
@@ -66,10 +95,15 @@ Chi tiết D03:
 
 Khi một đề xuất được xác nhận:
 
-1. Chuyển dòng tương ứng sang bảng “Quyết định đã xác nhận”.
+1. Cập nhật `docs/DECISIONS.md` trước, rồi mới đồng bộ vào bảng trên.
 2. Ghi người xác nhận và ngày xác nhận.
 3. Cập nhật test/acceptance criteria bị ảnh hưởng.
 4. Nếu quyết định thay đổi, ghi thêm dòng mới thay vì xóa lịch sử quyết định cũ.
+
+Nếu nghiệp vụ chưa trả lời được mà công việc cần đi tiếp, lựa chọn hợp lệ **không
+phải** là mặc định coi đề xuất là đúng. Chủ dự án phải chuyển nó sang
+`Working Assumption` với đủ owner, hạn, impact và nơi cô lập logic — xem
+`docs/DECISIONS.md` §3.
 
 ### 2.3. Decision gate theo chặng
 
@@ -84,8 +118,12 @@ Không bắt đầu code một chặng nếu decision bắt buộc của chặng
 | Chặng 5 | P03 |
 | Chặng 6 | P07 |
 
-Nếu decision chưa đóng, chỉ được làm spike/đọc tài liệu; không tính chặng đó đạt
-Definition of Done.
+Gate được coi là mở khi decision ở trạng thái `Confirmed` **hoặc**
+`Working Assumption` hợp lệ. Nếu còn `Pending`, chỉ được làm spike, micro-exercise
+và đọc tài liệu; không tính chặng đó đạt Definition of Done.
+
+Một chặng dùng `Working Assumption` không được đưa vào release/UAT cho đến khi
+giả định đó chuyển thành `Confirmed`.
 
 ### 2.4. Quy tắc kỹ thuật không phụ thuộc nghiệp vụ
 
@@ -99,16 +137,503 @@ Definition of Done.
 
 ## 3. Bản đồ kiến thức
 
-| Chặng | Concept chính | Sản phẩm đầu ra |
+| Chặng | Concept chính | Ba việc phải biết để dẫn AI | Sản phẩm đầu ra |
+| --- | --- | --- | --- |
+| 0 | Kiến trúc Odoo, module lifecycle, XML ID | Dựng skeleton; nối import/manifest; cài và đọc log | Module tối thiểu cài được |
+| 1 | ORM, model, fields, recordset, relations | Chốt schema; khai báo relation; kiểm chứng create/write/recompute | Data model hoàn chỉnh |
+| 2 | Compute, onchange, constraints, timezone | Viết rule; tách helper; test các boundary | Logic tính OT đúng và có test |
+| 3 | State machine, snapshot approver, notification port | Vẽ transition; viết guard; kiểm soát side effect/concurrency | Luồng duyệt độc lập với email |
+| 4 | ACL, record rules, method security | Lập ma trận quyền; triển khai lớp bảo vệ; test cả allow/deny | Không rò rỉ dữ liệu |
+| 5 | View XML, domain, search, OWL | Thiết kế interaction; nối UI với ORM; debug XML/JS | UI và nút tạo nhanh |
+| 6 | `mail.thread`, template, tracking | Chốt event/recipient; render/queue; kiểm tra fallback/audit | Email và lịch sử thay đổi |
+| 7 | Test framework, migration, release | Lập test matrix; rehearsal upgrade; release/UAT | Module sẵn sàng UAT |
+
+### 3.1. Cách học: AI-assisted, không AI-dependent
+
+#### Mô hình hybrid (D07)
+
+> User sở hữu: phân rã việc, decision, acceptance criteria, verification,
+> debugger và learning log.
+> AI được sửa code khi user giao hoặc chấp thuận một task brief nhỏ.
+> Với mỗi concept Odoo mới, user tự làm một **micro-exercise** trước; sau đó AI
+> mới được triển khai lát dự án tương ứng.
+
+Không có chặng nào bắt buộc code tay 100%, cũng không có chặng nào được giao
+trắng cho AI. Micro-exercise là cơ chế mở khóa: nó nhỏ (10–30 phút), chỉ nhắm
+vào **một** concept, và mục đích là để user tự tay chạm vào API trước khi đọc
+review code của người khác.
+
+| Concept mới | Micro-exercise tự làm trước | Lát dự án có thể giao AI sau đó |
 | --- | --- | --- |
-| 0 | Kiến trúc Odoo, module lifecycle, XML ID | Module tối thiểu cài được |
-| 1 | ORM, model, fields, recordset, relations | Data model hoàn chỉnh |
-| 2 | Compute, onchange, constraints, timezone | Logic tính OT đúng và có test |
-| 3 | State machine, snapshot approver, notification port | Luồng duyệt độc lập với email |
-| 4 | ACL, record rules, method security | Không rò rỉ dữ liệu |
-| 5 | View XML, domain, search, OWL | UI và nút tạo nhanh |
-| 6 | `mail.thread`, template, tracking | Email và lịch sử thay đổi |
-| 7 | Test framework, migration, release | Module sẵn sàng UAT |
+| Manifest/registry | Tự tạo một addon hai file cài được | Skeleton `ot_registration` đầy đủ |
+| Field/relation | Tự khai báo một `Many2one` + `One2many` chạy được | Toàn bộ schema MVP |
+| Compute/depends | Tự viết một computed field `store=True` | `total_hours`, `duration_hours` |
+| Constraint | Tự raise một `ValidationError` từ `@api.constrains` | Bộ constraint category/overlap |
+| Record rule | Tự viết một rule lọc theo `user.id` và test bằng `with_user` | Ma trận quyền đầy đủ |
+| OWL/service | Tự gọi service `orm` từ một component thử nghiệm | Nút tạo nhanh |
+
+Micro-exercise không cần đẹp và không cần commit vào module đích. Nó chỉ cần
+chạy được và user giải thích được vì sao nó chạy.
+
+#### Bốn trách nhiệm không giao trắng cho AI
+
+Trong mọi chặng, developer giữ bốn trách nhiệm không giao trắng cho AI:
+
+1. **Hiểu bài toán:** tự nói được actor, dữ liệu vào, kết quả, ràng buộc và lỗi
+   cần chặn.
+2. **Chia việc:** xác định 2–4 thay đổi độc lập và thứ tự thực hiện. Không dùng
+   prompt kiểu “hãy làm toàn bộ tính năng”.
+3. **Kiểm chứng:** tự chọn file cần review, test phải chạy, case âm và breakpoint
+   cần đặt.
+4. **Giải thích:** trước khi merge, nói được vì sao code nằm ở lớp đó, ORM chạy
+   lúc nào, quyền nào áp dụng và failure mode còn lại là gì.
+
+AI agent có thể hỗ trợ:
+
+- tìm vị trí code và giải thích API Odoo;
+- đề xuất kế hoạch hoặc các phương án thiết kế;
+- triển khai **một task nhỏ đã có acceptance criteria**;
+- sinh test case, review diff và nêu rủi ro;
+- phân tích log/stack trace sau khi developer đã cung cấp dữ kiện.
+
+AI **không bao giờ** làm thay những việc sau, kể cả khi được yêu cầu:
+
+- Quyết định nghiệp vụ, hoặc đóng một decision đang `Pending`.
+- Viết learning log.
+- Viết debug note. Giá trị quan sát phải do developer tự đọc từ debugger.
+- Kết luận "đã hiểu" hoặc tự đánh giá chặng đã đạt Definition of Done.
+
+AI không phải nguồn xác nhận cuối cùng. Code chỉ được chấp nhận khi khớp
+requirements/decision log, chạy qua test và developer đã lần được luồng chính
+bằng debugger ít nhất một lần.
+
+### 3.2. Vòng lặp bắt buộc cho mỗi tính năng
+
+#### Quy tắc 15/15 — trước khi hỏi AI
+
+Quy tắc này áp dụng cho **học concept và debug**, không phải rào cản hành chính
+cho mọi thao tác:
+
+| Giai đoạn | Được làm gì |
+| --- | --- |
+| 15 phút đầu | Tự viết giả thuyết, đọc log và tài liệu chính thức, thử debugger. Không hỏi AI |
+| 15 phút tiếp | Được hỏi AI để **giải thích**, tìm call path hoặc gợi ý hướng kiểm tra. Chưa giao implement |
+| Sau đó | Được giao AI implement, với điều kiện đã viết ra được expected behavior và cách verify |
+
+Với **bug**: phải hiểu root cause trước khi giao AI sửa. Sửa một triệu chứng
+chưa hiểu nguyên nhân là cách chắc chắn để nó quay lại.
+
+Với **tính năng mới**: không cần biết trước "root cause"; chỉ cần viết được
+acceptance criteria và cách kiểm chứng. Đó là ngưỡng đủ để giao việc.
+
+Khi công việc là mechanical và user đã hiểu rõ concept (đổi cú pháp, thêm test
+tương tự cái đã có, sinh boilerplate), có thể bỏ qua 15/15 và giao thẳng.
+
+#### Ví dụ phân rã
+
+Ví dụ tính năng “Employee Submit OT” có thể chia thành ba việc chính:
+
+1. **Validate dữ liệu:** state hiện tại, line, deadline, category và overlap.
+2. **Chuyển trạng thái:** snapshot approver, lock record và đổi sang
+   `to_approve_pm`.
+3. **Phát side effect:** tạo notification event/mail adapter nhưng không làm hỏng
+   transaction nghiệp vụ.
+
+Developer không bảo AI “code Submit”. Developer chạy vòng lặp sau cho từng việc:
+
+1. Tự viết feature map: method/event bắt đầu ở đâu, model/field nào tham gia và
+   output mong đợi.
+2. Đọc tối thiểu một implementation gần đó trong repo hoặc tài liệu chính thức.
+3. Viết task brief cho **một** lát nhỏ; yêu cầu AI nêu assumptions và file dự kiến
+   trước khi sửa.
+4. Cho AI triển khai cùng test tương ứng; không gộp refactor ngoài scope.
+5. Tự đọc diff từng dòng và yêu cầu AI giải thích phần chưa hiểu. Không merge dòng
+   code mà developer chưa diễn đạt lại được.
+6. Chạy test nhỏ nhất, sau đó test của module; đặt breakpoint đi qua một case đúng
+   và một case sai.
+7. Ghi learning log: điều đã hiểu, bug gặp phải, bằng chứng và giới hạn còn lại.
+
+Một feature chỉ hoàn thành khi cả ba lát nhỏ đều có bằng chứng riêng; không đánh
+giá theo việc “AI báo done”.
+
+### 3.3. Mẫu task brief để giao AI agent
+
+```markdown
+## Task: <một thay đổi nhỏ>
+
+### Decision IDs
+- D03, P09
+- Trạng thái: mọi ID ở trên phải là Confirmed hoặc Working Assumption hợp lệ.
+  Nếu còn Pending thì dừng, không giao task này.
+
+### Context
+- Luồng hiện tại: ...
+- File/model liên quan mà tôi đã xác định: ...
+
+### Micro-exercise tôi đã tự làm cho concept này
+- ...
+
+### Tôi hiểu tính năng gồm
+1. ...
+2. ...
+3. ...
+
+### Scope của task này
+- Chỉ làm việc số: ...
+- Không làm: ...
+
+### Files allowed / off-limits
+- Allowed: ...
+- Off-limits: ... (mặc định: security/, data/, __manifest__.py, mọi file
+  ngoài danh sách Allowed)
+
+### Invariants và security
+- ...
+
+### Acceptance criteria
+- Given ... When ... Then ...
+- Case bị từ chối: ...
+- Test phải thêm/chạy: ...
+
+### Verify trong 5 phút
+- Command/test: ...
+- Case đúng tôi sẽ chạy: ...
+- Case sai tôi sẽ chạy: ...
+
+### Yêu cầu với agent
+1. Trước khi sửa, kiểm tra giả định và chỉ ra call path.
+2. Đề xuất file cần đổi và lý do.
+3. Sửa tối thiểu, không refactor ngoài scope.
+4. Nếu một assumption sai hoặc cần đụng file off-limits: **dừng lại và hỏi**,
+   không tự quyết.
+5. Báo diff, test đã chạy và rủi ro chưa kiểm chứng.
+```
+
+Ô “Verify trong 5 phút” là bộ lọc quan trọng nhất: nếu chưa viết ra được cách
+kiểm chứng **trước khi** giao việc, nghĩa là chưa hiểu đủ để giao việc.
+
+Sau khi agent trả kết quả, developer phải tự trả lời được:
+
+- Vì sao thay đổi ở model/helper/view/rule này?
+- Method có thể được gọi từ form, RPC, import hoặc cron không?
+- `self` có thể có bao nhiêu record và transaction kết thúc ở đâu?
+- Dữ liệu nào tin được, dữ liệu nào phải validate lại ở backend?
+- Test nào sẽ fail nếu bỏ đoạn code quan trọng nhất?
+
+### 3.4. Học debug bằng debugger
+
+#### Chuẩn bị Python debugger (Docker, attach)
+
+Odoo **không chạy trên host** mà chạy trong container `odoo17-odoo-1`. Vì vậy
+debugger phải **attach** vào tiến trình trong container, không phải `launch` một
+`odoo-bin` trên máy. `config/odoo.conf` đã đặt `workers = 0`, đúng cho breakpoint.
+
+Ba phần phải có đủ:
+
+**1. Image có `debugpy`.** `docker/odoo-debug.Dockerfile` cài sẵn debugpy trên
+nền `odoo:17.0`. `compose.yml` mặc định **không** dùng image này; phải thêm
+override `compose.debug.yml`.
+
+**2. Odoo chạy dưới debugpy và mở cổng 5678.** `compose.debug.yml` build
+Dockerfile trên, chạy `python3 -m debugpy --listen 0.0.0.0:5678 /usr/bin/odoo`
+và bind `127.0.0.1:5678`.
+
+Một chi tiết dễ mất nửa buổi: entrypoint của image odoo chỉ tự chèn tham số DB
+(`--db_host`, `--db_user`, …) khi tham số đầu tiên là `odoo` hoặc `--`. Ở đây
+tham số đầu là `python3` nên entrypoint rơi vào nhánh `exec "$@"` và **không**
+chèn gì. `odoo.conf` cũng không có `db_host`. Do đó `compose.debug.yml` phải
+truyền `--db_*` bằng tay. Thiếu bước này Odoo sẽ cố nối tới database mặc định
+và fail.
+
+```bash
+export ODOO=<path-to-odoo17>       # xem docs/SETUP.md
+
+docker compose -f "$ODOO/compose.yml" -f "$ODOO/compose.debug.yml" up -d --build odoo
+docker compose -f "$ODOO/compose.yml" -f "$ODOO/compose.debug.yml" logs -f odoo
+```
+
+Kiểm chứng trước khi attach — cả ba dòng đều phải đúng:
+
+```bash
+docker compose -f "$ODOO/compose.yml" -f "$ODOO/compose.debug.yml" ps
+#   IMAGE phải là odoo17-debug:local
+
+ss -ltn | grep 5678
+#   LISTEN 127.0.0.1:5678
+
+docker compose -f "$ODOO/compose.yml" -f "$ODOO/compose.debug.yml" logs odoo | grep "database:"
+#   odoo: database: odoo@db:5432
+```
+
+Ba dòng trên chỉ chứng minh **container** đã sẵn sàng. Debugger chỉ được coi là
+chạy end-to-end khi IDE **thật sự dừng tại một breakpoint** — xem bài kiểm chứng
+bắt buộc ở cuối mục này.
+
+**3. IDE attach với path mapping.** Code nằm ở host `custom_addons/vti-japan/`
+nhưng trong container là `/mnt/extra-addons/vti-japan/`. Không map thì breakpoint
+hiện ra nhưng không bao giờ dừng.
+
+**PyCharm — dùng `Attach to DAP`**, không phải `Python Debug Server`:
+
+Run → Edit Configurations → `+` → **Attach to DAP**
+
+| Trường | Giá trị |
+| --- | --- |
+| Remote address | `127.0.0.1:5678` |
+| Local Root Path | project root đang mở — chọn bằng **Browse**, đừng gõ tay |
+| Remote Root Path | `/mnt/extra-addons/vti-japan` |
+| Store as project file | **bật** |
+
+Hai lưu ý khi điền:
+
+- **Không gõ literal `$ODOO/custom_addons/vti-japan` vào Local Root Path.**
+  PyCharm không expand biến shell; nó tự điền project root hoặc cho chọn bằng
+  Browse. Gõ tay chuỗi có `$ODOO` sẽ tạo mapping trỏ vào một đường dẫn không tồn
+  tại, và triệu chứng y hệt "breakpoint không dừng".
+- **Bật `Store as project file`.** Mặc định PyCharm lưu run configuration vào
+  `.idea/workspace.xml`, mà file đó đang bị `.gitignore` bỏ qua (đúng chủ ý — nó
+  chứa state cá nhân và churn liên tục). Bật tùy chọn này thì config được ghi
+  thành `.idea/runConfigurations/<tên>.xml`, đúng thư mục đã được whitelist, và
+  đi theo repo sang máy khác. Nhớ `git add` file XML đó.
+
+> **Không dùng `Python Debug Server`.** Nó chạy **chiều ngược lại**: PyCharm mở
+> listener, còn tiến trình đích phải chủ động gọi `pydevd_pycharm.settrace()` để
+> nối vào. Container của chúng ta chạy `debugpy --listen`, tức chính nó là server
+> nói giao thức DAP và chờ IDE nối tới. Chọn nhầm loại config là lý do phổ biến
+> nhất khiến breakpoint không bao giờ dừng dù cổng 5678 vẫn `LISTEN`.
+>
+> `Attach to DAP` có trên các bản PyCharm gần đây. Bản cũ không có mục này thì
+> có hai lối: dùng VS Code cho phiên debug, hoặc cài `pydevd-pycharm` vào image
+> và chuyển sang mô hình `settrace()` — khi đó `compose.debug.yml` không còn dùng
+> được và phải sửa lại toàn bộ mục này.
+
+Tài liệu: [PyCharm — Attach to DAP](https://www.jetbrains.com/help/pycharm/run-debug-configuration-attach-to-dap.html)
+
+VS Code (`.vscode/launch.json`):
+
+```json
+{
+  "name": "Odoo 17: attach (docker)",
+  "type": "debugpy",
+  "request": "attach",
+  "connect": { "host": "127.0.0.1", "port": 5678 },
+  "pathMappings": [
+    {
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/mnt/extra-addons/vti-japan"
+    }
+  ],
+  "justMyCode": false
+}
+```
+
+Mapping trên chỉ phủ code của module. Muốn step vào core Odoo, cần thêm một
+mapping tới source Odoo 17 trên host; nếu không có, frame core sẽ hiện nhưng
+không có source.
+
+Để debug một test, chạy một container dùng một lần thay vì service đang chạy.
+
+**Cổng 5678 chỉ có một.** Nếu service `odoo` debug đang chạy, nó đã giữ cổng đó
+và lệnh dưới sẽ fail với `address already in use`. Chọn một trong hai cách:
+
+Cách A — dừng service trước, giữ nguyên cấu hình IDE ở cổng 5678:
+
+```bash
+docker compose -f "$ODOO/compose.yml" -f "$ODOO/compose.debug.yml" stop odoo
+
+docker compose -f "$ODOO/compose.yml" -f "$ODOO/compose.debug.yml" run --rm \
+  -p 127.0.0.1:5678:5678 odoo \
+  python3 -m debugpy --listen 0.0.0.0:5678 --wait-for-client /usr/bin/odoo \
+  --config=/etc/odoo/odoo.conf -d <db_test> -u ot_registration \
+  --test-enable --test-tags=/ot_registration:<TestClass>.<test_method> \
+  --stop-after-init --db_host=db --db_user=odoo --db_password=odoo
+```
+
+Cách B — để service chạy tiếp, đẩy test sang cổng khác và tạo thêm một run
+configuration trỏ vào `5679` (path mapping giữ nguyên):
+
+```bash
+docker compose -f "$ODOO/compose.yml" -f "$ODOO/compose.debug.yml" run --rm \
+  -p 127.0.0.1:5679:5678 odoo \
+  python3 -m debugpy --listen 0.0.0.0:5678 --wait-for-client /usr/bin/odoo \
+  --config=/etc/odoo/odoo.conf -d <db_test> -u ot_registration \
+  --test-enable --test-tags=/ot_registration:<TestClass>.<test_method> \
+  --stop-after-init --db_host=db --db_user=odoo --db_password=odoo
+```
+
+`--wait-for-client` giữ tiến trình đứng chờ tới khi IDE attach — cần thiết cho
+test, vì test chạy xong trước khi kịp attach. Dùng database test riêng; không
+debug test trên database làm việc hằng ngày.
+
+Sau cách A, bật lại service khi xong:
+
+```bash
+docker compose -f "$ODOO/compose.yml" -f "$ODOO/compose.debug.yml" start odoo
+```
+
+#### Bài kiểm chứng debugger (bắt buộc, thuộc DoD Chặng 0)
+
+Container healthy và cổng 5678 mở **chưa phải** là debugger chạy được. Hai mức
+phải qua lần lượt, vì chúng hỏng vì hai lý do khác nhau:
+
+| Mức | Chứng minh điều gì | Đạt khi | Hỏng thì nghi ngờ |
+| --- | --- | --- | --- |
+| 1. Attach | Đường truyền IDE ↔ container | IDE báo connected, debug console mở | Sai loại run config (Python Debug Server thay vì Attach to DAP), sai cổng, container chưa chạy |
+| 2. Breakpoint dừng | Path mapping đúng | Chấm đỏ đặc, tiến trình dừng, đọc được biến | Path mapping sai local/remote |
+
+Cách chạy mức 2 ngay khi module đã cài được:
+
+1. Thêm tạm một `print()` hoặc một method nhỏ trong model của module.
+2. Đặt breakpoint tại dòng đó.
+3. Kích hoạt từ Odoo shell hoặc từ giao diện.
+4. Khi tiến trình dừng, đọc `self`, `self.env.user`, `self.env.context`.
+5. Xóa code tạm.
+
+Ghi kết quả vào learning log. Chưa dừng được ở một breakpoint thì Chặng 0 chưa
+đạt Definition of Done, dù module đã cài thành công.
+
+Quy trình đặt breakpoint:
+
+1. Tái hiện lỗi bằng bộ dữ liệu nhỏ nhất và ghi **kết quả mong đợi / thực tế**.
+2. Đặt breakpoint đầu tiên tại entry point gần user action nhất, ví dụ
+   `action_submit()`, `create()`, `write()` hoặc constraint; không đặt ngẫu nhiên
+   khắp code.
+3. Step over để xem luồng; step into helper do module sở hữu; chỉ step vào core
+   Odoo khi cần kiểm chứng giả thuyết về framework.
+4. Quan sát `self.ids`, `self.env.user`, `self.env.context`, field đầu vào, state
+   trước/sau và exception. Với security, luôn xem user/company hiện tại.
+5. Viết một giả thuyết ngắn trước mỗi lần chạy lại, ví dụ “onchange đúng nhưng
+   create không gọi helper”. Đổi đúng một yếu tố để bác bỏ/xác nhận giả thuyết.
+6. Khi tìm được nguyên nhân, viết test tái hiện trước hoặc cùng bản sửa; chạy lại
+   debugger để chứng minh luồng đã đổi đúng.
+
+Không sửa giá trị trong debugger rồi coi đó là fix. Watch/evaluate dùng để quan
+sát và kiểm chứng; source code và test mới là thay đổi có thể lặp lại.
+
+#### Breakpoint Odoo quan trọng theo loại lỗi
+
+| Hiện tượng | Entry point nên dừng | Giá trị cần quan sát |
+| --- | --- | --- |
+| Field không tính lại | method `compute`, `create`, `write` | `self.ids`, `@api.depends`, cache, giá trị dependency |
+| Form đúng nhưng import sai | onchange và `create`/constraint | `env.context`, `vals`, helper backend có được gọi không |
+| Button không đổi state | `action_*` và guard | state, current user, approver snapshot, exception |
+| User thấy sai record | business method, rule/domain liên quan | `env.user`, groups, companies, search domain |
+| XML/view không load | log parse view và external ID | file trong manifest, XPath, XML ID, thứ tự load |
+| Email sai người nhận | notification adapter/template render | snapshot recipient, email, rendered values, savepoint |
+| Test migration sai | upgrade `prepare`, script, `check` | schema version, ID đã lưu, record trước/sau backfill |
+
+#### Debug JavaScript/OWL
+
+Mở Odoo với `?debug=assets`, dùng DevTools → Sources để đặt breakpoint trong file
+JS gốc của module. Theo dõi props, state, payload gửi qua service `orm`, action
+result và Network response. Có thể dùng statement `debugger;` tạm thời khi học,
+nhưng phải xóa trước commit. Lỗi backend trả qua RPC vẫn cần quay lại Python
+debugger tại method tương ứng.
+
+### 3.5. Definition of Done chung cho năng lực dùng AI
+
+Ngoài Definition of Done kỹ thuật của từng chặng, mỗi chặng chỉ được coi là hoàn
+thành khi developer có đủ năm bằng chứng:
+
+- Một feature map hoặc sơ đồ call path tự viết.
+- Các task brief nhỏ đã dùng để dẫn AI, không có prompt giao trắng cả chặng.
+- Một diff review note giải thích các quyết định quan trọng và rủi ro.
+- Test cho case đúng và case sai.
+- Một debug note gồm breakpoint, giá trị quan sát, root cause và cách test chứng
+  minh bản sửa.
+
+Năm bằng chứng trên đều do developer tự viết và tự đánh giá, nên chúng **không
+đủ** để phân biệt hiểu thật với cảm giác hiểu. Vì vậy mỗi chặng còn có một bài
+gate khách quan ở §3.7. Learning note đẹp nhưng trượt bài gate thì chặng đó chưa
+đạt.
+
+### 3.6. Lab điều phối AI và debugger theo từng chặng
+
+Mỗi chặng chọn một feature đại diện và tự dẫn agent qua ba task. Agent chỉ nhận
+một task tại một thời điểm; developer review và debug xong task trước mới giao
+task tiếp theo.
+
+| Chặng | Feature lab | Task 1 giao agent | Task 2 giao agent | Task 3 giao agent | Debug drill bắt buộc |
+| --- | --- | --- | --- | --- | --- |
+| 0 | Module skeleton | Manifest/dependency | Import model/data theo đúng thứ tự | Action/menu/view tối thiểu | Cố tình bỏ một import, dừng/đọc startup log và xác định vì sao model/XML ID không tồn tại |
+| 1 | Request và line | Chốt field/relation/ondelete | Sequence và create/copy | Compute tổng giờ/snapshot | Breakpoint ở `create` và compute; theo `vals`, recordset và lần recompute |
+| 2 | Phân loại OT | Viết bảng rule/boundary | Helper timezone/category | Constraint và test biên | Tạo case form đúng nhưng ORM sai; dừng ở onchange, create và constraint để chỉ ra lớp bảo vệ thật |
+| 3 | Submit/Approve/Reject | State/transition/guard | Lock và state update | Notification port/idempotency | Double-submit bằng hai transaction; quan sát state trước/sau lock và nơi request thứ hai bị chặn |
+| 4 | Quyền xem/duyệt | Ma trận actor × operation | ACL/rule/domain | Guard method và negative tests | Chạy cùng operation bằng employee/PM/DL; quan sát `env.user`, groups, companies và AccessError |
+| 5 | Quick create | Contract wizard/backend | View/action/OWL caller | UI/tour test | Breakpoint JS trước RPC, kiểm tra Network payload rồi dừng Python tại method nhận request |
+| 6 | Thông báo sau transition | Event và recipient matrix | Template/queue adapter | Savepoint/fallback activity | Cố tình làm template render lỗi; theo state, savepoint rollback và fallback activity |
+| 7 | Upgrade field mới | Source/target schema fixture | Backfill script idempotent | `prepare`/update/`check` | Dừng ở ba pha upgrade, so sánh record cũ trước/sau và chứng minh lần chạy lại không nhân đôi dữ liệu |
+
+Trong lab, AI có thể đề xuất breakpoint nhưng developer phải tự chạy debugger và
+ghi giá trị thực tế. Không chấp nhận debug note chỉ là phần giải thích do AI sinh.
+
+### 3.7. Bài gate khách quan mỗi chặng
+
+Mục tiêu: đo năng lực **phát hiện code sai**, thứ mà self-report không đo được.
+Đây là năng lực quyết định khi làm việc với AI, vì code AI sinh thường trông rất
+hợp lý.
+
+Mentor chuẩn bị một bài có lỗi thật, ở **một trong ba dạng** dưới đây. Không bao
+giờ chèn lỗi ngầm vào working tree thật của user:
+
+| Dạng | Cách dùng |
+| --- | --- |
+| Snippet có lỗi | Dán trong chat, user đọc và chỉ lỗi |
+| Exercise file/branch tạm | `docs/exercises/stage-N/`, xóa sau khi xong |
+| Test đỏ chuẩn bị trước | User nhận một test fail và phải tìm nguyên nhân |
+
+Năm bước bắt buộc, làm theo đúng thứ tự:
+
+1. **Dự đoán trước khi chạy.** Viết ra kết quả mong đợi. Bước này làm trước, vì
+   sau khi thấy output thì không còn đo được gì.
+2. **Tìm lỗi trong 30–45 phút.**
+3. **Giải thích root cause** theo cơ chế Odoo, không phải mô tả triệu chứng.
+4. **Viết test chống tái phát**, phải đỏ trước khi sửa.
+5. **Sửa mà không làm hỏng test khác.**
+
+Không hoàn thành đủ năm bước thì chặng chưa đạt Definition of Done, kể cả khi
+toàn bộ tính năng đã chạy và learning note đầy đủ.
+
+Được dùng AI ở bước 3–5 để đối chiếu sau khi đã tự đưa ra kết luận. **Không**
+được dùng AI ở bước 1–2 — đó chính là phần đang được đo.
+
+### 3.8. AI hay nói sai gì về Odoo 17
+
+Corpus Odoo 12/14/15 lớn hơn Odoo 17 rất nhiều, nên model có xu hướng trả về cú
+pháp cũ một cách tự tin. Bảng dưới chỉ gồm các mục **đã kiểm chứng**:
+
+| AI hay đề xuất | Odoo 17 dùng | Cách kiểm chứng nhanh |
+| --- | --- | --- |
+| `attrs="{'invisible': [...]}"`, `states="draft"` | Biểu thức trực tiếp: `invisible="state != 'draft'"` | Upgrade module; view cũ sẽ lỗi parse |
+| `@api.multi` | Bỏ hẳn | `grep -rn "api.multi"` phải rỗng |
+| `track_visibility='onchange'` | `tracking=True` | `grep -rn track_visibility` phải rỗng |
+| `${object.name}` trong mail template | Dynamic placeholder QWeb: `{{ object.name }}` | Preview template, không còn placeholder thô |
+| Override `name_get()` | `_compute_display_name` | `name_get` đã deprecated trong ORM changelog 17.0 |
+| `ListController.include(...)` | OWL registry/patch đúng phạm vi | Kiểm tra bundle nạp và console không lỗi |
+| Khai báo asset bằng XML template | Khai báo `assets` trong `__manifest__.py` | Asset không nạp thì thấy ngay ở Network |
+
+Điểm **không** thuộc danh sách trên: `<tree>` vẫn là root element hợp lệ của list
+view trong Odoo 17 và được dùng trong tutorial chính thức 17.0. Việc đổi tên
+sang `<list>` gắn với phiên bản mới hơn, không áp dụng cho project này.
+
+Quy tắc vận hành:
+
+> Mọi API **nhạy cảm theo phiên bản** phải được đối chiếu với tài liệu chính thức
+> Odoo 17 hoặc source Odoo 17, sau đó chứng minh bằng test hoặc install thành công.
+
+Không bắt buộc mọi API đều phải có link tài liệu — nhiều API nội bộ không được
+document đầy đủ. Trong trường hợp đó, source trong container là nguồn kiểm chứng:
+
+```bash
+docker compose -f "$ODOO/compose.yml" exec odoo \
+  grep -rn "<pattern>" /usr/lib/python3/dist-packages/odoo/
+```
+
+Tài liệu tham chiếu:
+
+- [Basic Views 17.0](https://www.odoo.com/documentation/17.0/developer/tutorials/server_framework_101/06_basicviews.html)
+- [Email Templates 17.0](https://www.odoo.com/documentation/17.0/applications/general/companies/email_template.html)
+- [ORM changelog 17.0](https://www.odoo.com/documentation/17.0/developer/reference/backend/orm/changelog.html)
 
 ---
 
@@ -186,15 +711,18 @@ External ID giúp code tham chiếu dữ liệu ổn định thay vì hard-code 
 - Đảm bảo tất cả model và wizard được import đúng.
 - Tạm thời chưa làm custom JavaScript; ưu tiên module cài được trước.
 
-Lệnh tham khảo:
+Odoo chạy trong Docker, không phải trên host. Lệnh install/upgrade nằm ở
+[`docs/SETUP.md`](docs/SETUP.md) §5 — nguồn lệnh chuẩn. Điểm cần hiểu ở chặng này
+không phải cú pháp lệnh mà là **khác biệt giữa `-i` và `-u`**:
 
-```bash
-./odoo-bin -c <odoo.conf> -d <database> \
-  -i ot_registration --stop-after-init
+| | `-i` (install) | `-u` (upgrade) |
+| --- | --- | --- |
+| Khi nào chạy | Module chưa có trong database | Module đã cài, vừa sửa code/XML |
+| Làm gì | Tạo bảng, nạp security và data lần đầu | Cập nhật schema, nạp lại data khai báo |
+| Chạy lại lần hai | Không có tác dụng nếu module đã cài | Chạy được nhiều lần |
 
-./odoo-bin -c <odoo.conf> -d <database> \
-  -u ot_registration --stop-after-init
-```
+Chạy `-i` trên module đã cài sẽ **không** nạp lại data; đây là nguyên nhân phổ
+biến của "tôi sửa XML rồi mà không thấy đổi".
 
 ### 4.3. Bài thực hành
 
@@ -219,6 +747,8 @@ Lệnh tham khảo:
 - Không còn lỗi Python hoặc JavaScript trong log/console.
 - Addon đích được Git theo dõi và không còn manifest/migration mang version
   `12.0.1.0.0`.
+- **Debugger dừng được tại một breakpoint trong code của module** (§3.4, bài kiểm
+  chứng hai mức). Container healthy chưa tính là đạt.
 
 Tài liệu:
 
@@ -1610,35 +2140,29 @@ Mỗi commit chỉ nên giải quyết một chủ đề:
 
 ## 13. Mẫu learning log
 
-Sau mỗi buổi, ghi lại:
+Nguồn dùng hằng ngày là [`docs/LEARNING_LOG.md`](docs/LEARNING_LOG.md). Mục này
+chỉ tóm tắt quy tắc.
+
+**Mỗi buổi: bắt buộc đúng 3 dòng**, ghi được trong 3–5 phút cuối buổi.
 
 ```markdown
-## Ngày YYYY-MM-DD
+## YYYY-MM-DD — Chặng N
 
-### Concept đã học
-
-- ...
-
-### Phần đã triển khai
-
-- ...
-
-### Test đã chạy
-
-- ...
-
-### Điều chưa hiểu
-
-- ...
-
-### Lỗi gặp phải và nguyên nhân
-
-- ...
-
-### Việc tiếp theo
-
-- ...
+- **Hiểu thêm:** ...
+- **Mất >15 phút / còn mờ:** ...
+- **Tiếp theo:** ...
 ```
+
+**Chỉ ghi thêm khi thực sự có việc đó:**
+
+| Có việc gì | Ghi thêm mục nào |
+| --- | --- |
+| Giao task cho AI | Task brief đã dùng; điểm đã yêu cầu AI sửa lại và lý do; rủi ro chưa kiểm chứng |
+| Debug một bug thật | Expected/actual → giả thuyết → breakpoint và giá trị quan sát → root cause → test chống tái phát |
+| Kết chặng | Cả hai mục trên, cộng kết quả bài gate khách quan §3.7 |
+
+Template dài bắt buộc mỗi buổi là cách nhanh nhất để log ngừng được ghi. Ba dòng
+được ghi đều đặn có giá trị hơn tám mục bỏ trống.
 
 Không chỉ ghi “đã sửa được”; cần ghi nguyên nhân lỗi và vì sao cách sửa phù hợp
 với Odoo.
@@ -1653,6 +2177,9 @@ Có thể:
 - Phân biệt compute/onchange/constraint.
 - Xử lý timezone và validation cơ bản.
 - Viết model test.
+- Tự chia logic category thành rule, helper và lớp validation để giao AI riêng.
+- Dùng Python debugger theo luồng form → onchange → ORM → constraint và giải
+  thích vì sao kết quả khác nhau.
 
 ### Sau chặng 4
 
@@ -1662,6 +2189,9 @@ Có thể:
 - Viết wizard.
 - Thiết kế ACL/record rule.
 - Bảo vệ public method khỏi lời gọi trái phép.
+- Viết task brief cho transition và security mà không giao AI toàn bộ workflow.
+- Debug state, current user, record rule và concurrent transition bằng dữ liệu
+  quan sát được.
 
 ### Sau chặng 6
 
@@ -1670,6 +2200,8 @@ Có thể:
 - Xây form/list/search view Odoo 17.
 - Mở rộng frontend bằng OWL ở mức cơ bản.
 - Dùng mail template và chatter đúng mục đích.
+- Theo được một thao tác từ breakpoint JavaScript qua RPC đến Python method.
+- Review được recipient, transaction boundary và fallback do AI triển khai.
 
 ### Sau chặng 7
 
@@ -1679,14 +2211,26 @@ Có thể:
 - Viết test nghiệp vụ và security.
 - Viết migration.
 - Chuẩn bị module cho UAT và bàn giao.
+- Dẫn AI thực hiện từng lát của một feature từ requirement đến test mà không mất
+  quyền kiểm soát thiết kế.
+- Đọc diff, đặt breakpoint, xác định root cause và yêu cầu AI sửa đúng phạm vi.
+- Giải thích được các phần code chính của module cho một developer khác.
 
 ## 15. Điểm bắt đầu đề xuất
 
-Buổi đầu tiên nên hoàn thành đúng ba việc:
+Buổi đầu tiên nên hoàn thành đúng ba việc kỹ thuật:
 
 1. Chạy Odoo 17 Community với một database test mới.
 2. Ghi lại kết quả cài module mẫu hiện tại.
 3. Chuẩn hóa skeleton để module Odoo 17 cài và upgrade thành công.
+
+Ba bài học điều phối đi kèm:
+
+1. Tự vẽ lifecycle từ `__manifest__.py` → `__init__.py` → registry → XML data.
+2. Viết ba task brief riêng cho manifest, Python import và view/menu rồi mới giao
+   agent lần lượt.
+3. Cố tình tạo một lỗi import hoặc XML ID trên database test, dùng debugger/log
+   tìm root cause, sau đó thêm ghi chú và test/check chống tái phát.
 
 Chưa triển khai email, JavaScript hoặc workflow phức tạp trước khi đạt được
 baseline này.

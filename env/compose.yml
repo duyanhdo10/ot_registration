@@ -1,0 +1,60 @@
+name: ${COMPOSE_PROJECT_NAME:-odoo17}
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-odoo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-odoo}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  odoo:
+    image: odoo:17.0
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      HOST: db
+      PORT: 5432
+      USER: ${POSTGRES_USER:-odoo}
+      PASSWORD: ${POSTGRES_PASSWORD:-odoo}
+    command:
+      - odoo
+      - --config=/etc/odoo/odoo.conf
+    # Môi trường học/dev local: chỉ bind loopback.
+    # admin_passwd trong config/odoo.conf là "admin" và list_db = True, nên
+    # bind 0.0.0.0 sẽ mở giao diện quản trị database ra toàn bộ mạng LAN.
+    # Cần truy cập từ máy khác thì đổi admin_passwd trước, rồi mới mở bind.
+    ports:
+      - "127.0.0.1:${ODOO_PORT:-8069}:8069"
+    volumes:
+      - odoo-data:/var/lib/odoo
+      - ./config/odoo.conf:/etc/odoo/odoo.conf:ro
+      - ./custom_addons:/mnt/extra-addons
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8069/', timeout=5)"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  postgres-data:
+  odoo-data:

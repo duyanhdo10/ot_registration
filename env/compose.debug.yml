@@ -1,0 +1,29 @@
+# Debug override. Dùng kèm compose.yml:
+#   docker compose -f compose.yml -f compose.debug.yml up -d --build odoo
+#
+# Vì sao phải truyền --db_* bằng tay:
+# entrypoint.sh của image odoo chỉ tự chèn tham số DB khi argv[0] là "odoo"
+# hoặc "--". Ở đây argv[0] là "python3" nên entrypoint rơi vào nhánh
+# `exec "$@"` và không chèn gì. config/odoo.conf cũng không có db_host.
+services:
+  odoo:
+    build:
+      context: .
+      dockerfile: docker/odoo-debug.Dockerfile
+    image: odoo17-debug:local
+    command:
+      - python3
+      - -m
+      - debugpy
+      - --listen
+      - 0.0.0.0:5678
+      - /usr/bin/odoo
+      - --config=/etc/odoo/odoo.conf
+      - --db_host=db
+      - --db_port=5432
+      - --db_user=${POSTGRES_USER:-odoo}
+      - --db_password=${POSTGRES_PASSWORD:-odoo}
+    environment:
+      PYDEVD_DISABLE_FILE_VALIDATION: "1"
+    ports:
+      - "127.0.0.1:${ODOO_DEBUG_PORT:-5678}:5678"

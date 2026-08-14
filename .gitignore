@@ -1,2 +1,13 @@
 # Legacy reference module; keep it local and out of version control.
 /ot_registration/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# JetBrains: ignore personal IDE state, but keep run configurations so the
+# debugger setup follows the repo across machines (see docs/SETUP.md).
+# Note: `.idea/*` + negation is required — git cannot re-include a file whose
+# parent directory is excluded, so `.idea/` alone would make the `!` line inert.
+.idea/*
+!.idea/runConfigurations/

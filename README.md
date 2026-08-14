@@ -9,6 +9,12 @@ trên Odoo 17 Community.
   phân quyền, email và giao diện.
 - [ROADMAP.md](ROADMAP.md): roadmap theo từng chặng, gồm concept cần học,
   bài thực hành, test và tiêu chí hoàn thành.
+- [docs/SETUP.md](docs/SETUP.md): dựng môi trường Docker trên một máy mới.
+- [docs/DECISIONS.md](docs/DECISIONS.md): **nguồn sự thật duy nhất** cho mọi
+  quyết định nghiệp vụ và kỹ thuật.
+- [docs/LEARNING_LOG.md](docs/LEARNING_LOG.md): nhật ký học theo buổi.
+- [CLAUDE.md](CLAUDE.md): hợp đồng làm việc mentor/học viên (hybrid AI-assisted).
+- [env/](env/): bản gốc của các file môi trường Docker.
 
 ## Định hướng triển khai
 
