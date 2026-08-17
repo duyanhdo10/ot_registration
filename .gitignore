@@ -11,3 +11,4 @@ __pycache__/
 # parent directory is excluded, so `.idea/` alone would make the `!` line inert.
 .idea/*
 !.idea/runConfigurations/
+.vscode
