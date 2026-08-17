@@ -67,6 +67,7 @@ khác**; chỉ chủ dự án mới đổi được trạng thái. Khi một dec
 | D05 | Mentor mode: Claude giảng và review, không tự ý sửa code module khi chưa được giao | Chủ dự án | 2026-07-31 |
 | D06 | Giữ cả hai bản clone; chỉ làm việc trong `vti-japan/` | Chủ dự án | 2026-07-31 |
 | D07 | Hybrid AI-assisted learning; làm rõ phần "ai viết code" của D05 (xem §3.1) | Chủ dự án | 2026-08-14 |
+| D08 | Repo đích hiện tại là `custom_addons/ot_registration/`; thay thế ràng buộc đường dẫn và clone đích trong D06 | Chủ dự án | 2026-08-17 |
 
 Chi tiết D03:
 
