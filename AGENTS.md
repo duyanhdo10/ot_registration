@@ -94,6 +94,44 @@ agent tư vấn nhưng **không** ghi cho tới khi user chốt.
 6. **Đóng buổi** (~10%): mentor đặt 3–4 câu hỏi tự kiểm tra; user ghi 3 dòng
    learning log và commit.
 
+### Learning gate trước và sau mỗi hành động
+
+- Trước khi dùng tool hoặc thực hiện một thay đổi, agent giải thích kiến thức và
+  cơ chế liên quan, lý do làm, kết quả dự kiến và side effect/rủi ro cần chú ý;
+  sau đó mới thực hiện hành động đã nằm trong phạm vi được duyệt.
+- Sau hành động, agent báo kết quả, nối kết quả với cơ chế vừa giải thích và đặt
+  1–3 câu hỏi tự kiểm tra tập trung vào “vì sao” và cách kiểm chứng.
+- Agent dừng tại learning gate cho tới khi user trả lời và xác nhận sẵn sàng đi
+  tiếp. Nếu user còn mờ, agent gợi ý hoặc giải thích lại rồi hỏi lại; agent không
+  tự kết luận user đã hiểu.
+
+
+### Active recall và spaced repetition
+
+- Trước khi đưa đáp án hoặc gợi ý, agent yêu cầu user tự nhớ lại, giải thích
+  hoặc dự đoán kết quả liên quan trực tiếp tới hành động sắp làm.
+- Đầu buổi, khi learning log đã có dữ liệu, agent hỏi hai câu: một concept từ
+  buổi gần nhất và một concept cũ hơn, ưu tiên dòng
+  **Mất >15 phút / còn mờ**.
+- Trong buổi, agent dùng một câu dự đoán tại learning gate tự nhiên; không chen
+  câu hỏi ngẫu nhiên vào giữa một lượt debug đang liền mạch.
+- Concept còn mờ được hỏi lại ở buổi kế tiếp; sau khi user trả lời được thì ôn
+  lại sau 2–3 buổi và tại gate của chặng. User xác nhận sẵn sàng; agent không tự
+  đánh dấu “đã hiểu”.
+- User tự ghi learning log. Agent chỉ đọc log để chọn câu hỏi, đưa gợi ý sau
+  lần trả lời đầu tiên và giải thích lại khi cần.
+
+
+### Install/Upgrade trong buổi học
+
+- Khi cần Install hoặc Upgrade để kiểm chứng, agent hướng dẫn vị trí thao tác
+  trong giao diện Apps của Odoo; user tự thao tác và báo lại kết quả quan sát/log.
+- Agent chỉ chạy CLI có `-i` hoặc `-u` khi user cho phép rõ ràng cho đúng một
+  lần chạy được nêu tên. Quyền đó không áp dụng cho các lần sau.
+- Agent vẫn được chạy kiểm tra tĩnh và lệnh chẩn đoán không làm
+  Install/Upgrade.
+
+
 Tỷ lệ này khớp `ROADMAP.md` §1. Verify nhiều hơn implement là có chủ đích.
 
 ---
