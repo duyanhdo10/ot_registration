@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ot_request_tree" model="ir.ui.view">
+        <field name="name">ot.request.tree</field>
+        <field name="model">ot.request</field>
+        <field name="arch" type="xml">
+            <tree string="OT Requests">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_ot_request_form" model="ir.ui.view">
+        <field name="name">ot.request.form</field>
+        <field name="model">ot.request</field>
+        <field name="arch" type="xml">
+            <form string="OT Request">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ot_request" model="ir.actions.act_window">
+        <field name="name">OT Requests</field>
+        <field name="res_model">ot.request</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_ot_registration_root"
+        name="OT Registration"
+        sequence="10"
+    />
+    <menuitem
+        id="menu_ot_request"
+        name="OT Requests"
+        parent="menu_ot_registration_root"
+        action="action_ot_request"
+        sequence="10"
+    />
+</odoo>

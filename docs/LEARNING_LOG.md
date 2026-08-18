@@ -94,3 +94,65 @@ Odoo**.
     source `ir_model.py` trong container. Đây cũng là lý do debugger vẫn còn
     nằm ở mục Tiếp theo.
   - Test chống tái phát: chưa có — Chặng 0 chưa tới phần viết test tự động.
+
+### Draft đóng buổi — chưa được user xác nhận (D09)
+
+- **Hiểu thêm (draft, user cần tự đọc/sửa/xác nhận):**
+  - File XML chỉ được Odoo nạp khi nằm trong danh sách data của
+    __manifest__.py. Loader tạo/cập nhật view, action và menu trong database
+    qua external ID.
+  - ir.ui.view lưu kiến trúc giao diện; ir.actions.act_window mở res_model;
+    menu chỉ là điểm điều hướng gọi action.
+  - Odoo có thể ẩn menu action ngay từ đầu nếu user không có quyền read trên
+    model đích; XML load thành công không đồng nghĩa menu sẽ visible.
+  - docker compose down không xóa named volume khi không có -v. Tuy nhiên,
+    Compose chọn compose.yml trước docker-compose.yml; hai file khai báo
+    volume khác nhau nên up đã tạo một bộ volume rỗng mới.
+
+- **Mất >15 phút / còn mờ (draft):**
+  - Cần tự diễn đạt lại ba lớp riêng: XML được load vào database, ACL cho phép
+    truy cập model, và logic menu visibility dùng quyền read.
+  - Cần nhớ dùng file Compose chuẩn theo docs/SETUP.md, không dựa vào cơ chế
+    tự tìm file khi thư mục có cả compose.yml và docker-compose.yml.
+
+- **Tiếp theo (draft):**
+  - Duyệt và triển khai Task 3b: ACL tối thiểu cho base.group_system, rồi
+    Upgrade trên UI và chạy lại probe visibility.
+  - Sau khi menu mở được, setup và verify debugger thật để hoàn tất phần còn
+    thiếu của DoD Chặng 0.
+
+- **Task brief đã dùng (draft):** Task 3 (Chặng 0), Decision IDs D01/D07/D08.
+  Scope: __manifest__.py, views/ot_request_views.xml; off-limits: model,
+  security và workflow. Agent đã thêm list/form view, window action và menu.
+  User đã yêu cầu bỏ qua micro-exercise action/menu/view. Không có điểm sửa lại
+  code sau review trong task này. Task 3b về ACL mới chỉ là đề xuất, chưa được
+  duyệt và chưa triển khai.
+
+- **Debug note — Compose dùng nhầm bộ volume (draft):**
+  - Expected: docker compose down && docker compose up -d giữ database cũ.
+  - Actual: Postgres của compose.yml chỉ có database postgres; database ứng
+    dụng không xuất hiện trên UI.
+  - Evidence: thư mục có cả hai Compose file; bộ volume của compose.yml được
+    tạo lúc 23:07, còn volume cũ được tạo ngày 01/08. Probe read-only trên bản
+    copy volume cũ tìm thấy database odoo17, module ot_registration ở trạng
+    thái installed và bảng ot_request.
+  - Root cause: trước đây Compose dùng docker-compose.yml; khi compose.yml
+    xuất hiện/được ưu tiên, tên và mount target volume đổi nên stack nối vào
+    cluster PostgreSQL mới, không phải dữ liệu bị xóa bởi down.
+  - Verification sau recovery: DB và Odoo container đều healthy; database
+    odoo17 tồn tại; module ot_registration là installed; HTTP login trả 200.
+    Hai volume nguồn cũ và hai backup volume vẫn được giữ.
+  - Breakpoint: chưa dùng debugger; dữ kiện đến từ Docker metadata, psql và
+    probe container trên bản copy read-only.
+
+- **Debug note — menu không visible (draft):**
+  - Expected: sau Upgrade, menu OT Registration → OT Requests xuất hiện.
+  - Actual: user không thấy menu.
+  - Feedback loop bằng Odoo shell với base.user_admin:
+    root_loaded=True, child_loaded=True, can_read=False,
+    root_visible=False, child_visible=False.
+  - Root cause: module chưa có ACL cho ot.request; Odoo lọc menu có action
+    trỏ tới model mà user không có quyền read.
+  - Test chống tái phát hiện đang đỏ: Odoo-shell assertion yêu cầu cả root và
+    child menu visible. Chạy lại sau Task 3b; chưa có fix hay kết quả xanh.
+  - Breakpoint: chưa dùng debugger thật trong bug này.
