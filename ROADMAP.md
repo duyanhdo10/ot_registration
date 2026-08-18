@@ -200,9 +200,14 @@ AI agent có thể hỗ trợ:
 AI **không bao giờ** làm thay những việc sau, kể cả khi được yêu cầu:
 
 - Quyết định nghiệp vụ, hoặc đóng một decision đang `Pending`.
-- Viết learning log.
-- Viết debug note. Giá trị quan sát phải do developer tự đọc từ debugger.
-- Kết luận "đã hiểu" hoặc tự đánh giá chặng đã đạt Definition of Done.
+- Kết luận "đã hiểu" hoặc tự đánh giá chặng đã đạt Definition of Done — kể cả
+  khi đã draft log theo D09.
+
+Theo D09 (`docs/DECISIONS.md`), AI được **draft** nội dung learning log khi
+developer yêu cầu, nhưng draft chỉ tính là ghi xong sau khi developer tự đọc,
+sửa và xác nhận. Giá trị quan sát trong debug note (breakpoint, biến, stack
+trace) luôn phải do developer tự đọc từ debugger — AI không được bịa hoặc suy
+luận thay, kể cả khi draft phần tường thuật còn lại.
 
 AI không phải nguồn xác nhận cuối cùng. Code chỉ được chấp nhận khi khớp
 requirements/decision log, chạy qua test và developer đã lần được luồng chính

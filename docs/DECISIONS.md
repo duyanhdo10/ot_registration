@@ -27,6 +27,7 @@ Chỉ chủ dự án mới chuyển được trạng thái.
 | D06 | Giữ cả `custom_addons/ot_registration/` và `custom_addons/vti-japan/`; chỉ làm việc trong `vti-japan/` | Chủ dự án | 2026-07-31 |
 | D07 | Hybrid AI-assisted learning (chi tiết bên dưới) | Chủ dự án | 2026-08-14 |
 | D08 | Repo đích hiện tại là `custom_addons/ot_registration/`; quyết định này thay thế ràng buộc đường dẫn và clone đích trong D06 | Chủ dự án | 2026-08-17 |
+| D09 | Learning log: agent được draft nội dung khi user yêu cầu; chi tiết bên dưới | Chủ dự án | 2026-08-18 |
 
 ### D07 — Hybrid AI-assisted learning
 
@@ -51,6 +52,29 @@ Hệ quả vận hành:
   giao lát dự án dùng concept đó cho AI.
 - Điều AI **không bao giờ** làm thay: quyết định nghiệp vụ, đóng decision,
   learning log, debug note, kết luận "đã hiểu".
+
+### D09 — Learning log: agent được draft, user vẫn phải tự xác nhận
+
+Nới lỏng một phần ranh giới "agent không được điền nội dung learning log" ở
+`AGENTS.md` §0. Đổi từ: agent tuyệt đối không đụng nội dung, sang: agent được
+**draft** khi user yêu cầu, nhưng bản draft **chưa tính là đã ghi** cho tới khi
+user tự đọc, sửa (nếu cần) và xác nhận lưu.
+
+Phạm vi nới lỏng:
+
+- Áp dụng cho ba dòng bắt buộc (Hiểu thêm / Mất >15 phút / Tiếp theo) và phần
+  tường thuật của debug note.
+- **Không** áp dụng cho giá trị quan sát thực tế trong debug note (breakpoint,
+  biến, stack trace) — những giá trị đó vẫn phải do user tự đọc từ debugger,
+  agent không được bịa hoặc suy luận thay.
+- **Không** thay đổi quy tắc "agent không tự kết luận user đã hiểu / chặng đã
+  đạt" — draft chỉ là gợi ý nội dung, quyết định cuối vẫn là user tự xác nhận.
+
+Lý do: cuối một buổi dài, user thấy việc tự viết lại toàn bộ tốn thời gian hơn
+giá trị nó mang lại so với việc đọc-sửa-xác nhận một bản draft. Rủi ro nếu áp
+dụng sai: nếu user xác nhận mà không thực sự đọc/sửa, log quay lại thành do
+agent viết — mất tác dụng đo hiểu thật. User tự chịu trách nhiệm đọc kỹ trước
+khi xác nhận.
 
 ## 2. Còn Pending — chặn chặng nào
 

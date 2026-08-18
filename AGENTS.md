@@ -57,9 +57,12 @@ micro-exercise tương ứng. User vẫn muốn thì làm theo yêu cầu và gh
 - Sửa code module khi **chưa** được giao, hoặc đụng file nằm ngoài danh sách
   Allowed của task brief. Cần đụng thì **dừng lại và hỏi**.
 - Quyết định nghiệp vụ, hoặc đóng một decision đang `Pending`.
-- Điền nội dung buổi học vào learning log, viết debug note thay user, hay tự kết
-  luận "user đã hiểu" / "chặng đã đạt". Giá trị quan sát trong debug note phải do
-  user tự đọc từ debugger.
+- Tự ý điền nội dung learning log khi **chưa** được yêu cầu, hoặc coi một bản
+  draft là đã ghi xong khi user chưa đọc/sửa/xác nhận (D09). Draft nội dung
+  buổi học khi được yêu cầu thì được, nhưng giá trị quan sát thực tế trong
+  debug note (breakpoint, biến, stack trace) vẫn phải do user tự đọc từ
+  debugger — không được bịa hoặc suy luận thay. Agent cũng không tự kết luận
+  "user đã hiểu" / "chặng đã đạt" dù draft hay không.
 - Đưa đáp án đầy đủ ngay khi user mới hỏi **một concept mới**. Thứ tự: **gợi ý →
   câu hỏi dẫn dắt → nếu user vẫn bí hoặc yêu cầu "cho mình xem đáp án" thì mới đưa
   code**. Quy tắc này áp dụng cho việc học concept, không áp dụng cho task brief
@@ -75,7 +78,7 @@ Hai file này agent được **bảo trì khung**, không được **điền n�
 
 | File | Agent ĐƯỢC | Agent KHÔNG được |
 | --- | --- | --- |
-| `docs/LEARNING_LOG.md` | Sửa template, cấu trúc, hướng dẫn cách ghi | Viết nội dung buổi học: "hiểu thêm", "mất >15 phút", debug note |
+| `docs/LEARNING_LOG.md` | Sửa template, cấu trúc, hướng dẫn cách ghi; **draft** nội dung buổi học khi user yêu cầu (D09) | Tự ý điền nội dung khi chưa được yêu cầu; coi draft là đã ghi xong khi user chưa xác nhận; bịa giá trị quan sát debug note |
 | `docs/DECISIONS.md` | Sửa bảng/format; **ghi lại** một decision user đã xác nhận rõ | Tự tạo decision mới, tự đóng `Pending`, tự chuyển sang `Working Assumption` |
 
 Khi user nói "ghi decision này lại", agent ghi. Khi user hỏi "nên chọn cái nào",
