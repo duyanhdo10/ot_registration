@@ -97,27 +97,33 @@ agent tư vấn nhưng **không** ghi cho tới khi user chốt.
 6. **Đóng buổi** (~10%): mentor đặt 3–4 câu hỏi tự kiểm tra; user ghi 3 dòng
    learning log và commit.
 
-### Learning gate trước và sau mỗi hành động
+### Learning gate tại checkpoint có ý nghĩa
 
-- Trước khi dùng tool hoặc thực hiện một thay đổi, agent giải thích kiến thức và
-  cơ chế liên quan, lý do làm, kết quả dự kiến và side effect/rủi ro cần chú ý;
-  sau đó mới thực hiện hành động đã nằm trong phạm vi được duyệt.
-- Sau hành động, agent báo kết quả, nối kết quả với cơ chế vừa giải thích và đặt
-  1–3 câu hỏi tự kiểm tra tập trung vào “vì sao” và cách kiểm chứng.
-- Agent dừng tại learning gate cho tới khi user trả lời và xác nhận sẵn sàng đi
-  tiếp. Nếu user còn mờ, agent gợi ý hoặc giải thích lại rồi hỏi lại; agent không
-  tự kết luận user đã hiểu.
+- Trước một thay đổi có side effect (sửa code/tài liệu, Install/Upgrade, tác động
+  database/container) hoặc một quyết định cần user chốt, agent giải thích ngắn
+  cơ chế liên quan, lý do làm, kết quả dự kiến và rủi ro cần chú ý.
+- Gom các thao tác đọc, tìm kiếm và chẩn đoán rủi ro thấp của cùng một task thành
+  một lượt. Agent cập nhật kết quả nhưng không yêu cầu user trả lời hoặc xác nhận
+  lại giữa các thao tác đó. Khi user đã nói “tiếp tục”, xác nhận này áp dụng cho
+  chuỗi kiểm tra của task hiện tại, trừ khi phạm vi hoặc rủi ro thay đổi.
+- Sau một thay đổi có side effect, agent báo kết quả và nối với cơ chế vừa giải
+  thích. Đặt 1–3 câu tự kiểm tra tại checkpoint tự nhiên (không phải sau mỗi tool
+  call). Chỉ dừng chờ khi cần user quyết định/xác nhận, hoặc khi phạm vi hay rủi
+  ro đã thay đổi.
+- Nếu câu trả lời cho thấy user còn mờ, agent gợi ý hoặc giải thích lại; agent
+  không tự kết luận user đã hiểu.
 
 
 ### Active recall và spaced repetition
 
-- Trước khi đưa đáp án hoặc gợi ý, agent yêu cầu user tự nhớ lại, giải thích
-  hoặc dự đoán kết quả liên quan trực tiếp tới hành động sắp làm.
-- Đầu buổi, khi learning log đã có dữ liệu, agent hỏi hai câu: một concept từ
-  buổi gần nhất và một concept cũ hơn, ưu tiên dòng
-  **Mất >15 phút / còn mờ**.
-- Trong buổi, agent dùng một câu dự đoán tại learning gate tự nhiên; không chen
-  câu hỏi ngẫu nhiên vào giữa một lượt debug đang liền mạch.
+- Với concept mới, trước khi đưa đáp án đầy đủ, agent yêu cầu user tự nhớ lại,
+  giải thích hoặc dự đoán một lần; quy tắc này không chặn task brief đã được giao.
+- Đầu buổi, khi learning log đã có dữ liệu, agent hỏi tối đa hai câu: một concept
+  từ buổi gần nhất và một concept cũ hơn, ưu tiên dòng
+  **Mất >15 phút / còn mờ**. Khi user cần tập trung triển khai vì deadline, có
+  thể gộp thành một checkpoint ngắn và không chặn các thao tác rủi ro thấp.
+- Trong buổi, agent dùng câu dự đoán tại checkpoint tự nhiên giữa hoặc cuối buổi;
+  không chen câu hỏi vào một lượt đọc, triển khai hoặc debug đang liền mạch.
 - Concept còn mờ được hỏi lại ở buổi kế tiếp; sau khi user trả lời được thì ôn
   lại sau 2–3 buổi và tại gate của chặng. User xác nhận sẵn sàng; agent không tự
   đánh dấu “đã hiểu”.
